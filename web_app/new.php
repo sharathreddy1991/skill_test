@@ -1,3 +1,7 @@
+<?php
+session_start();
+?>
+
 <h1>Create New Employee</h1>
 <form action="" method="post">
     <ul>
@@ -31,35 +35,36 @@
 <?php
 
 if ($_POST) {
-    $dbConnection = mysql_connect("localhost", "root");
-    mysql_select_db("test");
+    $dbConnection = mysqli_connect("localhost", "root", "", "test");
+    if (!$dbConnection) {
+        die("<h2>Connection failed: " . mysqli_connect_error() . "</h2>");
+    }
 
-    $sql = "insert into employee (`name`, `phone_number`, `email`, `type`) VALUES ('" .
-        mysql_escape_string($_POST['name']) . "', '" . mysql_escape_string($_POST['phone_number']) . "', '" . mysql_escape_string($_POST['email']) . "', '" . mysql_escape_string($_POST['employee_type']) . "')";
-    $result = mysql_query($sql);
+    $sql = "INSERT INTO employee (`name`, `phone_number`, `email`, `type`) VALUES ('" .
+        mysqli_real_escape_string($dbConnection, $_POST['name']) . "', '" . mysqli_real_escape_string($dbConnection, $_POST['phone_number']) . "', '" . mysqli_real_escape_string($dbConnection, $_POST['email']) . "', '" . mysqli_real_escape_string($dbConnection, $_POST['employee_type']) . "')";
+    $result = mysqli_query($dbConnection, $sql);
 
     if (!$result) {
-        die("<h2>Sorry could not add employee: " . mysql_error(). "</h2>" );
-
+        die("<h2>Sorry could not add employee: " . mysqli_error($dbConnection) . "</h2>");
     }
 
     $timestamp = date("d/m/y h:i:s");
-    $sql = "insert into audit_log (`message`) VALUES ('{$_POST['name']} was added on $timestamp')";
-    mysql_query($sql);
+    $sql = "INSERT INTO audit_log (`message`) VALUES ('{$_POST['name']} was added on $timestamp')";
+    mysqli_query($dbConnection, $sql);
 
     $uniq = $_POST['password'];
     mail($_POST['email'], "Thanks for registering", "Dear " . $_POST['name'] . ",\nThanks for registering with AwesomeCorp!! your password is $uniq.\nYou can login at: http://www.awesomecorp.com/login.\nRegards,\nAwesomeCorp");
 
-
-    $sql = "select max(id) from employee";
-    $row = mysql_fetch_row(mysql_query($sql));
+    $sql = "SELECT MAX(id) FROM employee";
+    $result = mysqli_query($dbConnection, $sql);
+    $row = mysqli_fetch_row($result);
     $id = $row[0];
     $_SESSION["logged_in_user_id"] = $id;
 
-    $sql = "update employee set password = '".sha1($uniq)."', email_sent = 1 where id = $id";
-    mysql_query($sql);
-    $newURL= "dashboard.php";
-    header('Location: '.$newURL);
+    $sql = "UPDATE employee SET password = '" . sha1($uniq) . "', email_sent = 1 WHERE id = $id";
+    mysqli_query($dbConnection, $sql);
+    $newURL = "dashboard.php";
+    header('Location: ' . $newURL);
 }
 
 

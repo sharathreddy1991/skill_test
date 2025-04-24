@@ -24,8 +24,11 @@ var_dump(handle_API_Request($receivedData));
  */
 function handle_API_Request($data) {
     try {
+        $dbConnection = mysqli_connect("localhost", "root", "", "test");
+        if (!$dbConnection) {
+            throw new Exception("Connection failed: " . mysqli_connect_error());
+        }
 
-        mysql_connect("localhost", "root");
         $employee = new Employee();
         $employee->name = $data['name'];
         $employee->email = $data['email'];
@@ -36,12 +39,10 @@ function handle_API_Request($data) {
 
         $employee->save();
 
-        //auditing
         $timestamp = date("d/m/y h:i:s");
-        $sql = "insert into audit_log (`message`) VALUES ('{$employee->name} was added on $timestamp')";
-        mysql_query($sql);
+        $sql = "INSERT INTO audit_log (`message`) VALUES ('{$employee->name} was added on $timestamp')";
+        mysqli_query($dbConnection, $sql);
 
-        //send comms
         mail($employee->email, "Thanks for registering", "Dear " . $employee->name . ",\nYou have been added to AwesomeCorp! your password is $generatedPassword.\nYou can login at: http://awesomecorp.recruiterforce.com/login.\nRegards,\nRecruiterForce");
 
         $employee->email_sent = 1;
@@ -51,12 +52,10 @@ function handle_API_Request($data) {
             "status" => "success",
             "message" => $employee->id . " was added"
         );
-    }
-    catch (exception $e) {
+    } catch (Exception $e) {
         return array(
             "status" => "error",
             "message" => $e->getMessage()
         );
     }
-
 }

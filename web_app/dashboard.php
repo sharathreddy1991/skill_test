@@ -1,3 +1,7 @@
+<?php
+session_start();
+?>
+
 <h1>Dashboard!</h1>
 
 <?php
