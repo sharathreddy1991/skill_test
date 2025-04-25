@@ -1,7 +1,7 @@
 <?php
 session_start();
 ?>
-
+<link rel="stylesheet" type="text/css" href="../assets/style.css">
 <h1>Dashboard!</h1>
 
 <?php

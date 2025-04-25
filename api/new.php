@@ -8,12 +8,13 @@ require_once("../models/Employee.php");
  * that has been specified here.
  */
 
-//allowed data is "name", "number", "email" & "type"
+//allowed data is "name", "number", "email" , "type" & "gender"
 $receivedData = array(
     "name" => "Bob Smith",
     "email" => "luke.zawadzki@astutepayroll.com",
     "number" => "+61 430 131 409",
-    "type" => "full-time"
+    "type" => "full-time",
+    "gender" => "Male"
 );
 
 //this simulates a call to the API.
@@ -23,6 +24,15 @@ var_dump(handle_API_Request($receivedData));
  * This is the processing code for the API.
  */
 function handle_API_Request($data) {
+
+    // Validate required fields
+    $requiredFields = ['name', 'email', 'number', 'type', 'gender'];
+    foreach ($requiredFields as $field) {
+        if (empty($data[$field])) {
+            throw new Exception("The field '$field' is required and cannot be empty.");
+        }
+    }
+    
     try {
         $dbConnection = mysqli_connect("localhost", "root", "", "test");
         if (!$dbConnection) {
@@ -34,6 +44,7 @@ function handle_API_Request($data) {
         $employee->email = $data['email'];
         $employee->phoneNumber = $data['number'];
         $employee->type = $data['type'];
+        $employee->gender = $data['gender'];
         $generatedPassword = uniqid();
         $employee->password = sha1($generatedPassword);
 

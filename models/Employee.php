@@ -43,6 +43,12 @@ class Employee {
     public $email;
 
     /**
+     * The employee's gender
+     * @var string
+     */
+    public $gender;
+
+    /**
      * @var string
      * @see self::TYPE_* constants
      */
@@ -73,22 +79,22 @@ class Employee {
         $updateId = false;
 
         if (!$this->id) {
-            $stmt = $pdo->prepare("INSERT INTO employee (`name`, `phone_number`, `type`, `email`, `password`, `email_sent`) VALUES (:name, :phone, :type, :email, :password, :email_sent)");
+            $stmt = $pdo->prepare("INSERT INTO employee (`name`, `phone_number`, `type`, `email`, `password`, `email_sent`, `gender`) VALUES (:name, :phone, :type, :email, :password, :email_sent, :gender)");
             $updateId = true;
         }
         else {
-            $stmt = $pdo->prepare("UPDATE employee SET `name` = :name, `phone_number` = :phone ,`type` = :type, `email` = :email, `password` = :password, `email_sent` = :email_sent where id = :id");
+            $stmt = $pdo->prepare("UPDATE employee SET `name` = :name, `phone_number` = :phone ,`type` = :type, `email` = :email, `password` = :password, `email_sent` = :email_sent, `gender` = :gender where id = :id");
             $stmt->bindParam(":id", $this->id);
         }
 
         $stmt->bindParam(':name', $this->name);
         $stmt->bindParam(':phone', $this->phoneNumber);
-        $stmt->bindParam(':type', $this->type);
         $stmt->bindParam(':email', $this->email);
         $stmt->bindParam(':password', $this->password);
         $stmt->bindParam(':email_sent', $this->email_sent);
-
-
+        $stmt->bindParam(':gender', $this->gender);
+        $stmt->bindParam(':type', $this->type);
+       
         if (!$stmt->execute()) {
             throw new Exception("Could not save employee.");
         }
